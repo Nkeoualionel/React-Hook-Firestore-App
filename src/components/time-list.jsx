@@ -1,6 +1,33 @@
 import React from 'react'
+import {useEffect, useState} from 'react'
+import firebase from '../firebase';
 
-const timelist = () => {
+function useGetDataTime () {
+
+    const [time, setTime] = useState([])
+
+    useEffect(() => {
+       firebase
+       .firestore()
+       .collection('reminders')
+       .onSnapshot((snapshot) => {
+           const newTime = snapshot.docs.map((doc) => ({
+               id: doc.id,
+               ...doc.data()
+           }))
+
+           setTime(newTime)
+       }) 
+       
+    }, [])
+
+    return time
+}
+
+const Timelist = () => {
+
+    const times =  useGetDataTime()
+       
     return (
     <div>  
         <div>
@@ -17,16 +44,19 @@ const timelist = () => {
             </select>
         </div>
         <ol>
-            <li> 
+            {times.map((time) => 
+            <li key={time.id}> 
                 <div className="time-entry"> 
-                 Your amawing title
-                  <code className="time">18 secondes</code>
+                {time.title}
+                <code className="time">{time.secondes} secondes</code>
                 </div>
             </li>
+        )}
+            
 
         </ol>
        </div> 
     )
 }
 
-export default timelist
+export default Timelist
